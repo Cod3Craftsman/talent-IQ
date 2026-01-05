@@ -36,8 +36,8 @@ function CodeEditorPanel({
         </button>
       </div>
 
-      <div className="flex-1">
-        <Editor height={"100%"} language={LANGUAGE_CONFIG[selectedLanguage].monacoLang} value={code} onChange={onCodeChange} theme="vs-dark" options={{
+      <div className="flex-1 overflow-hidden">
+        <Editor height={"100%"} language={LANGUAGE_CONFIG[selectedLanguage].monacoLang} value={code} onChange={(value) => onCodeChange(value || "")} theme="vs-dark" options={{
           fontSize: 14,
           lineNumbers: "on",
           scrollBeyondLastLine: false,

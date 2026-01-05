@@ -109,10 +109,10 @@ function ProblemPage() {
   return (
     <div className="h-screen bg-base-100 flex flex-col">
       <Navbar />
-      <div className="flex-1">
-        <PanelGroup direction="horizontal">
+      <div className="flex-1 overflow-hidden">
+        <PanelGroup direction="horizontal" storageKey="editor-layout">
           {/* Left panel:- Problem description */}
-          <Panel defaultSize={40} minSize={30}>
+          <Panel defaultSize={40} minSize={20} collapsible>
             <ProblemDescription
               problem={currentProblem}
               currentProblemId={currentProblemId}
@@ -121,12 +121,12 @@ function ProblemPage() {
             />
           </Panel>
 
-          <PanelResizeHandle className="w-2 bg-base-300 hover:bg-primary transition-colors cursor-col-resize" />
+          <PanelResizeHandle  disabled={isRunning} className="w-2 bg-base-300 hover:bg-primary transition-colors cursor-col-resize" />
           {/* Right panel:- Code editor & output */}
-          <Panel defaultSize={60} minSize={30}>
-            <PanelGroup direction="vertical">
+          <Panel defaultSize={60} minSize={30} collapsible className="h-full">
+            <PanelGroup direction="vertical" storageKey="right-layout"  className="h-full">
               {/* Top panel:- Code editor */}
-              <Panel defaultSize={70} minSize={30}>
+              <Panel defaultSize={75} minSize={30} className="overflow-hidden">
                 <CodeEditorPanel
                   selectedLanguage={selectedLanguage}
                   code={code}
@@ -137,12 +137,12 @@ function ProblemPage() {
                 />
               </Panel>
 
-              <PanelResizeHandle className="h-2 bg-base-300 hover:bg-primary transition-colors cursor-row-resize" />
+              <PanelResizeHandle disabled={isRunning} className="h-2 bg-base-300 hover:bg-primary transition-colors cursor-row-resize" />
 
 
               {/* Down panel:- Output */}
-              <Panel defaultSize={30} minSize={30}>
-                <OutputPanel output={output} />
+              <Panel defaultSize={25} minSize={0} collapsible className="overflow-auto">
+                <OutputPanel output={"Run the code to see output" || output} />
               </Panel>
             </PanelGroup>
           </Panel>
