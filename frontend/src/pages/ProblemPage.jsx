@@ -3,10 +3,13 @@ import { useParams } from "react-router"
 import { PROBLEMS } from "../data/problems.js"
 import Navbar from "../components/Navbar.jsx"
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels"
-import CodeEditor from "../components/CodeEditor.jsx";
+import CodeEditorPanel from "../components/CodeEditorPanel.jsx";
 import OutputPanel from "../components/OutputPanel.jsx";
 import ProblemDescription from "../components/ProblemDescription.jsx";
 import { useNavigate } from "react-router";
+import { executeCode } from "../lib/piston.js";
+import toast from "react-hot-toast"
+import confetti from "canvas-confetti"
 
 function ProblemPage() {
   const { id } = useParams();
@@ -34,17 +37,73 @@ function ProblemPage() {
 
 
   const handleLanguageChange = (e) => {
-
+    const newLang = e.target.value
+    setSelectedLanguage(newLang)
+    setCode(currentProblem.starterCode[newLang])
+    setOutput(null)
   }
 
   const handleProblemChange = (newProblemId) => navigate(`/problem/${newProblemId}`)
 
-  const triggerConfetti = () => { }
+  const triggerConfetti = () => {
+    confetti({
+      particleCount: 80,
+      spread: 250,
+      origin: { x: 0.2, y: 0.6 },
+    });
 
-  const checkIfTestsPassed = () => { }
+    confetti({
+      particleCount: 80,
+      spread: 250,
+      origin: { x: 0.8, y: 0.6 },
+    });
+  };
 
-  const hadnleRunCode = () => {
+  const normalizeOutput = (output = "") => {
+  return String(output)
+    .trim()
+    .split("\n")
+    .map(line =>
+      line
+        .trim()
+        .replace(/\[\s+/g, "[")
+        .replace(/\s+\]/g, "]")
+        .replace(/\s*,\s*/g, ",")
+    )
+    .filter(Boolean)
+    .join("\n")
+}
 
+
+  const checkIfTestsPassed = (actualOutput, expectedOutput) => {
+    const normalizedActual = normalizeOutput(actualOutput);
+    const normalizedExpected = normalizeOutput(expectedOutput);
+    // return true when normalized outputs match, otherwise false
+    return normalizedActual === normalizedExpected;
+  }
+
+  const handleRunCode = async () => {
+    setIsRunning(true)
+    setOutput(null)
+    const result = await executeCode(selectedLanguage, code)
+    setOutput(result)
+    setIsRunning(false)
+    // * check if code executed successfully and matches expected output
+    if (result.success) {
+      const expectedOutput = currentProblem.expectedOutput[selectedLanguage]
+      const testsPassed = checkIfTestsPassed(result.output, expectedOutput)
+
+      if (testsPassed) {
+        triggerConfetti()
+        toast.success("All tests passed! Great job!")
+      }
+      else {
+        toast.error("Tests failed. Check your output!")
+      }
+
+    } else {
+      toast.error("Code execution failed!")
+    }
   }
 
   return (
@@ -68,7 +127,14 @@ function ProblemPage() {
             <PanelGroup direction="vertical">
               {/* Top panel:- Code editor */}
               <Panel defaultSize={70} minSize={30}>
-                <CodeEditor />
+                <CodeEditorPanel
+                  selectedLanguage={selectedLanguage}
+                  code={code}
+                  isRunning={isRunning}
+                  onLanguageChange={handleLanguageChange}
+                  onCodeChange={setCode}
+                  onRunCode={handleRunCode}
+                />
               </Panel>
 
               <PanelResizeHandle className="h-2 bg-base-300 hover:bg-primary transition-colors cursor-row-resize" />
@@ -76,7 +142,7 @@ function ProblemPage() {
 
               {/* Down panel:- Output */}
               <Panel defaultSize={30} minSize={30}>
-                <OutputPanel />
+                <OutputPanel output={output} />
               </Panel>
             </PanelGroup>
           </Panel>
