@@ -16,8 +16,8 @@ const __dirname = path.resolve();
 app.use(express.json());
 //credentials:true , means server allows a browser to include cookies on request
 app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
-app.use(clerkMiddleware());
 app.use("/api/inngest", serve({ client: inngest, functions }));
+app.use(clerkMiddleware());
 app.use("/api/chat",chatRoutes)
 app.use("/api/sessions",sessionRoutes)
 
