@@ -23,7 +23,7 @@ function CreateSessionModal({
               <span className="label-text-alt text-error">*</span>
             </label>
 
-            <select className="select w-full" value={roomConfig.problem} onChange={(e,prev) => {
+            <select className="select w-full" value={roomConfig.problem} onChange={(e , prev) => {
               const selectedProblem = problems.find(p => p.title === e.target.value)
               setRoomConfig({
                 ...prev,
